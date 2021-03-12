@@ -1,50 +1,30 @@
-import {
-	CustomMap
-} from "./map";
+import "leaflet/dist/leaflet.css";
+import { SmoothWheelZoom } from "./SmoothWheelZoom";
+import { AddCustomMarkers } from "./AddCustomMarkers";
 
-function windowLoad() {
-	return new Promise(res => {
-		window.addEventListener("load", () => {
-			res()
-		})
-	})
+export function customizeMap(L, { maxX = 1000, maxY = 1000 } = {}) {
+	SmoothWheelZoom(L);
+	AddCustomMarkers(L, maxX, maxY);
+
+	const CustomMap = L.Map.extend({
+		initialize: function (container, options) {
+			console.log(container, options);
+			L.Map.prototype.initialize.call(this, container, {
+				...options,
+				crs: L.CRS.Simple,
+				scrollWheelZoom: false,
+				smoothWheelZoom: true,
+				doubleClickZoom: false,
+			});
+
+			const bounds = new L.LatLngBounds([
+				[0, 0],
+				[maxX, maxY],
+			]);
+
+			this.fitBounds(bounds);
+		},
+	});
+
+	L.CustomMap = CustomMap;
 }
-
-function getElementById(id) {
-	const el = document.getElementById(id)
-	if (!el) {
-		throw new Error(`Element with ID ${id} not found.`)
-	}
-	return el
-}
-
-function main() {
-	const container = getElementById("container")
-	const map = new CustomMap(container)
-	map.init()
-	map.addMarker()
-	map.addMarker({
-		x: -50,
-		y: -50,
-		render: () => `<div style="border-radius: 10px; position: absolute; width: 50px; height: 50px; background-color: orange"></div>`
-	})
-	map.addMarker({
-		x: 50,
-		y: 50,
-		render: () => `<div style="border-radius: 10px; position: absolute; width: 50px; height: 50px; background-color: orange"></div>`
-	})
-	map.addMarker({
-		x: -50,
-		y: 50,
-		render: () => `<div style="border-radius: 10px; position: absolute; width: 50px; height: 50px; background-color: orange"></div>`
-	})
-	map.addMarker({
-		x: 50,
-		y: -50,
-		render: () => `<div style="border-radius: 10px; position: absolute; width: 50px; height: 50px; background-color: orange"></div>`
-	})
-
-	map.leafletMap.flyTo([500, 500], 2)
-}
-
-windowLoad().then(main)

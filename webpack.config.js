@@ -7,10 +7,13 @@ module.exports = ({
 		mode: development ? "development" : "production",
 		devtool: development ? "source-map" : undefined,
 		watch: development,
-		entry: path.join(__dirname, "src", "index.js"),
+		entry: {
+			"bundle": path.join(__dirname, "src", "index.js"),
+			"example": path.join(__dirname, "src", "example.js"),
+		},
 		output: {
 			path: path.join(__dirname, "dist", "js"),
-			filename: "bundle.js"
+			filename: "[name].js"
 		},
 		resolve: {
 			extensions: [".js"]
