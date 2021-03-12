@@ -8,7 +8,6 @@ export function customizeMap(L, { maxX = 1000, maxY = 1000 } = {}) {
 
 	const CustomMap = L.Map.extend({
 		initialize: function (container, options) {
-			console.log(container, options);
 			L.Map.prototype.initialize.call(this, container, {
 				...options,
 				crs: L.CRS.Simple,

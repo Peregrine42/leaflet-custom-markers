@@ -59,22 +59,29 @@ export function AddCustomMarkers(L, maxX, maxY) {
 				this.start();
 			}
 
-			map.on("zoom", () => {
-				if (!this.animating) {
-					this.transitionCache = this._icon.style[
-						L.DomUtil.TRANSITION
-					];
-					this._icon.style[L.DomUtil.TRANSITION] = "";
-				}
-			});
+			this.zoomHandler = this.zoomHandler.bind(this);
+			this.zoomEndHandler = this.zoomEndHandler.bind(this);
+			map.on("zoom", this.zoomHandler);
+			map.on("zoomend", this.zoomEndHandler);
+		},
 
-			map.on("zoomend", () => {
-				if (!this.animating) {
-					this._icon.style[
-						L.DomUtil.TRANSITION
-					] = this.transitionCache;
-				}
-			});
+		zoomHandler: function () {
+			if (!this.animating) {
+				this.transitionCache = this._icon.style[L.DomUtil.TRANSITION];
+				this._icon.style[L.DomUtil.TRANSITION] = "";
+			}
+		},
+
+		zoomEndHandler: function () {
+			if (!this.animating) {
+				this._icon.style[L.DomUtil.TRANSITION] = this.transitionCache;
+			}
+		},
+
+		onRemove: function (map) {
+			map.off("zoom", this.zoomHandler);
+			map.off("zoomend", this.zoomEndHandler);
+			L.Marker.prototype.onRemove.call(this, map);
 		},
 
 		animate: function () {
@@ -245,21 +252,19 @@ export function AddCustomMarkers(L, maxX, maxY) {
 				x = 0,
 				y = 0,
 				z = 0,
-				render = () => {
-					return `
-						<div 
-							class="marker" 
-							style="
-								position: absolute; 
-								width: 50px; 
-								height: 50px;
-								border-radius: 10px;
-								background-color: orange;
-							"
-						>
-						</div>
-					`;
-				},
+				innerHTML = `
+					<div 
+						class="marker" 
+						style="
+							position: absolute; 
+							width: 50px; 
+							height: 50px;
+							border-radius: 10px;
+							background-color: orange;
+						"
+					>
+					</div>
+				`,
 			} = options;
 
 			const self = this;
@@ -273,14 +278,12 @@ export function AddCustomMarkers(L, maxX, maxY) {
 				size: 1,
 			};
 
+			this.innerHTML = innerHTML;
+
 			FixedMarker.prototype.initialize.call(this, this.customOptions);
 
 			this.render = (opts) => {
-				const inner = render({
-					...opts,
-					marker: self,
-					map,
-				});
+				const inner = this.innerHTML;
 				return `
 					<div 
 						style="
