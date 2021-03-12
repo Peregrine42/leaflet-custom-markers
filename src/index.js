@@ -26,30 +26,23 @@ function main() {
 	map.addMarker({
 		x: -50,
 		y: -50,
-		render: () => `<div style="position: absolute; width: 50px; height: 50px; background-color: red"></div>`
+		render: () => `<div style="border-radius: 10px; position: absolute; width: 50px; height: 50px; background-color: orange"></div>`
 	})
 	map.addMarker({
 		x: 50,
 		y: 50,
-		render: () => `<div style="position: absolute; width: 50px; height: 50px; background-color: yellow"></div>`
+		render: () => `<div style="border-radius: 10px; position: absolute; width: 50px; height: 50px; background-color: orange"></div>`
 	})
 	map.addMarker({
 		x: -50,
 		y: 50,
-		render: () => `<div style="position: absolute; width: 50px; height: 50px; background-color: orange"></div>`
+		render: () => `<div style="border-radius: 10px; position: absolute; width: 50px; height: 50px; background-color: orange"></div>`
 	})
-	const moving = map.addMarker({
-		x: 300,
+	map.addMarker({
+		x: 50,
 		y: -50,
-		render: () => `<div style="position: absolute; width: 50px; height: 50px; background-color: blue"></div>`
+		render: () => `<div style="border-radius: 10px; position: absolute; width: 50px; height: 50px; background-color: orange"></div>`
 	})
-
-	moving.setLine([
-		[550, 800],
-		[550, 550],
-	])
-
-	moving.start()
 
 	map.leafletMap.flyTo([500, 500], 2)
 }

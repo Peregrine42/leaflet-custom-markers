@@ -136,6 +136,7 @@ const AnimatedMarker = L.Marker.extend({
 			this.options.interval = 30;
 		}
 		this._i = 0;
+		return this;
 	}
 
 });
