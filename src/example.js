@@ -79,6 +79,7 @@ function main() {
 			image: "/img/test-image.jpeg",
 		}),
 		new Card({ id: "blue", color: "blue", z: 6 }),
+		new Card({ id: "orange", color: "orange", z: 8 }),
 	];
 
 	const testStacks = [
@@ -90,9 +91,9 @@ function main() {
 			color: "orange",
 			z: 9990,
 		}),
-		new Stack({ id: "south", x: 0, y: 200, color: "orange", z: 9990 }),
-		new Stack({ id: "east", x: 200, y: 0, color: "orange", z: 9990 }),
-		new Stack({ id: "west", x: -200, y: 0, color: "orange", z: 9990 }),
+		new Stack({ id: "south", x: 0, y: 200, color: "orange", z: 9991 }),
+		new Stack({ id: "east", x: 200, y: 0, color: "orange", z: 9992 }),
+		new Stack({ id: "west", x: -200, y: 0, color: "orange", z: 9993 }),
 	];
 
 	const container = getElementById("container");
@@ -100,6 +101,8 @@ function main() {
 	const map = new L.CustomMap(container, {
 		maxZoom: 3,
 		fullscreenControl: true,
+		doubleClickZoom: false,
+		minZoom: -0.5,
 	});
 	map.setMaxBounds(map.getBounds().pad(0.5));
 	const background = new L.CustomMarker({
@@ -179,16 +182,28 @@ function main() {
 					data-id=${s.id}
 					style="
 						position: absolute;
-						width: 25px;
-						height: 25px;
-						background-color: ${s.color};
-						border-radius: 50px;
-						border-style: solid;
-						border-color: white;
-						border-width: 3px;
+						width: 150px;
+						height: 150px;
+						display: flex;
+						justify-content: center;
+						align-items: center;
+						border-radius: 75px;
 						opacity: 0.2;
 					"
 				>
+					<div
+						data-id=${s.id}
+						style="
+							width: 25px;
+							height: 25px;
+							background-color: ${s.color};
+							border-radius: 50px;
+							border-style: solid;
+							border-color: white;
+							border-width: 3px;	
+						"
+					>
+					</div>
 				</div>
 			`,
 		}).addTo(map);
@@ -226,7 +241,7 @@ function main() {
 
 	L.DomEvent.on(container, "touchstart", (event) => {
 		testMarkers.forEach((testMarker) => {
-			if (testMarker.getIcon().contains(event.target)) {
+			if (testMarker.customOptions.id === event.target.dataset.id) {
 				target = testMarker;
 				map.dragging.disable();
 
@@ -267,7 +282,12 @@ function main() {
 			shadowMarker.remove();
 			shadowMarker = undefined;
 
-			if (event.target && event.target.dataset.id) {
+			const currentTarget = document.elementFromPoint(
+				event.clientX,
+				event.clientY
+			);
+
+			if (currentTarget && currentTarget.dataset.id) {
 				if (target) {
 					const latlng = map.mouseEventToLatLng(event);
 					endDragLatLng = latlng;
@@ -283,12 +303,12 @@ function main() {
 
 						try {
 							stackMarker = findById(
-								event.target.dataset.id,
+								currentTarget.dataset.id,
 								testStackMarkers
 							);
 						} catch {
 							stackMarker = findById(
-								event.target.dataset.id,
+								currentTarget.dataset.id,
 								testMarkers
 							);
 							while (
@@ -333,9 +353,12 @@ function main() {
 									i,
 									1
 								);
+
+								refreshStack(target.customOptions.stackedBy);
 							}
 							target.customOptions.stackedBy = stackMarker;
 							stackMarker.customOptions.stacked.push(target);
+							refreshStack(stackMarker);
 						}
 					} else {
 						const c = testCards.find(
@@ -361,23 +384,25 @@ function main() {
 
 		testStackMarkers.forEach((s) => {
 			s.getIcon().style.pointerEvents = "none";
-
-			if (s.customOptions.staggered) {
-				let base = s.getLatLng().clone();
-				s.customOptions.stacked.forEach((m) => {
-					m.setLine([m.getLatLng(), base]).start();
-					base = base.clone();
-					base.lat -= 10;
-					base.lng += 10;
-				});
-			} else {
-				const base = s.getLatLng().clone();
-				s.customOptions.stacked.forEach((m) => {
-					m.setLine([m.getLatLng(), base]).start();
-				});
-			}
 		});
 	});
+}
+
+function refreshStack(s) {
+	if (s.customOptions.staggered) {
+		let base = s.getLatLng().clone();
+		s.customOptions.stacked.forEach((m) => {
+			m.setLine([m.getLatLng(), base]).start();
+			base = base.clone();
+			base.lat -= 10;
+			base.lng += 10;
+		});
+	} else {
+		const base = s.getLatLng().clone();
+		s.customOptions.stacked.forEach((m) => {
+			m.setLine([m.getLatLng(), base]).start();
+		});
+	}
 }
 
 windowLoad().then(main);

@@ -62,29 +62,9 @@ export function AddCustomMarkers(L, maxX, maxY) {
 			if (this.options.autoStart) {
 				this.start();
 			}
-
-			this.zoomHandler = this.zoomHandler.bind(this);
-			this.zoomEndHandler = this.zoomEndHandler.bind(this);
-			map.on("zoom", this.zoomHandler);
-			map.on("zoomend", this.zoomEndHandler);
-		},
-
-		zoomHandler: function () {
-			if (!this.animating) {
-				this.transitionCache = this._icon.style[L.DomUtil.TRANSITION];
-				this._icon.style[L.DomUtil.TRANSITION] = "";
-			}
-		},
-
-		zoomEndHandler: function () {
-			if (!this.animating) {
-				this._icon.style[L.DomUtil.TRANSITION] = this.transitionCache;
-			}
 		},
 
 		onRemove: function (map) {
-			map.off("zoom", this.zoomHandler);
-			map.off("zoomend", this.zoomEndHandler);
 			L.Marker.prototype.onRemove.call(this, map);
 		},
 
@@ -109,10 +89,6 @@ export function AddCustomMarkers(L, maxX, maxY) {
 					this._icon.style[L.DomUtil.TRANSITION] =
 						"all " + speed + "ms linear";
 				}
-				if (this._shadow) {
-					this._shadow.style[L.DomUtil.TRANSITION] =
-						"all " + speed + "ms linear";
-				}
 			}
 
 			// Move to the next vertex
@@ -120,17 +96,25 @@ export function AddCustomMarkers(L, maxX, maxY) {
 			this._i++;
 
 			// Queue up the animation to the next next vertex
-			this._tid = setTimeout(() => {
-				if (self._i === len) {
-					this.animating = false;
-					self.options.onEnd.apply(
-						self,
-						Array.prototype.slice.call(this)
-					);
-				} else {
-					self.animate();
-				}
-			}, speed);
+			this._tid = setTimeout(
+				function () {
+					if (self._i >= len) {
+						if (L.DomUtil.TRANSITION) {
+							if (this._icon) {
+								this._icon.style[L.DomUtil.TRANSITION] = "";
+							}
+						}
+						this.animating = false;
+						self.options.onEnd.apply(
+							self,
+							Array.prototype.slice.call(this)
+						);
+					} else {
+						self.animate();
+					}
+				}.bind(this),
+				speed
+			);
 		},
 
 		// Start the animation
@@ -148,7 +132,7 @@ export function AddCustomMarkers(L, maxX, maxY) {
 
 		setLine: function (latlngs) {
 			if (L.DomUtil.TRANSITION) {
-				// No need to to check up the line if we can animate using CSS3
+				// No need to chunk up the line if we can animate using CSS3
 				this._latlngs = latlngs;
 			} else {
 				// Chunk up the lines into options.distance bits

@@ -72,6 +72,7 @@ export function SmoothWheelZoom(L) {
 		},
 
 		_onDblClick: function (e) {
+			// if (this._map.options.doubleClickZoom) {
 			let newZoom =
 				this._map._zoom +
 				this._map.options.zoomDelta * (e.shiftKey ? 3 : 1);
@@ -83,6 +84,7 @@ export function SmoothWheelZoom(L) {
 			if (!this._disabled) {
 				this._map.flyTo(e.latlng, newZoom);
 			}
+			// }
 		},
 
 		_onWheelStart: function (e) {
