@@ -7,11 +7,12 @@ import "leaflet-fullscreen/dist/Leaflet.fullscreen";
 import { customizeMap } from "./index";
 
 class Card {
-	constructor({ x = 0, y = 0, z = 0, color = null } = {}) {
+	constructor({ x = 0, y = 0, z = 0, color = null, image = null } = {}) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.color = color;
+		this.image = image;
 	}
 }
 
@@ -39,7 +40,7 @@ function main() {
 
 	const testCards = [
 		new Card({ color: "red", z: 5 }),
-		new Card({ color: "green", z: 7 }),
+		new Card({ color: "green", z: 7, image: "/img/test-image.jpeg" }),
 		new Card({ color: "blue", z: 6 }),
 	];
 
@@ -72,6 +73,17 @@ function main() {
 	}).addTo(map);
 
 	const testMarkers = testCards.map((c) => {
+		let backgroundImage = "";
+
+		if (c.image) {
+			backgroundImage = `
+				background-image: url(${c.image});
+				background-repeat: no-repeat;
+				background-position: center;
+				background-size: contain;
+			`;
+		}
+
 		const m = new L.CustomMarker({
 			x: c.x,
 			y: c.y,
@@ -82,10 +94,12 @@ function main() {
 						position: absolute;
 						width: 40px;
 						height: 55px;
-						background-color: ${c.color};
-						border-radius: 1px;
+						background-color: ${c.image ? "transparent" : c.color};
+						border-radius: 3px;
 						border-style: solid;
 						border-color: black;
+						border-width: ${c.image ? "0px" : "1px"};
+						${backgroundImage}
 					"
 				></div>
 			`,
@@ -127,21 +141,10 @@ function main() {
 				shadowMarker = new L.CustomMarker({
 					latlng: bboxLatLng,
 					z: 9999,
-					innerHTML: `
-						<div 
-							style="
-								position: absolute;
-								width: 40px;
-								height: 55px;
-								background-color: brown;
-								border-radius: 1px;
-								border-style: solid;
-								border-color: black;
-								opacity: 0.4;
-							"
-						></div>
-					`,
+					innerHTML: testMarker.innerHTML,
 				}).addTo(map);
+
+				shadowMarker.getIcon().style.opacity = 0.4;
 
 				L.DomEvent.on(container, "touchmove", shadowMoveHandlerTouch);
 			}
@@ -161,8 +164,6 @@ function main() {
 				const markers = [background].concat(testMarkers);
 
 				const maxZ = Math.max(...markers.map((m) => m.z));
-
-				console.log(maxZ);
 
 				target.setZ(maxZ + 1);
 
