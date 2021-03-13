@@ -1,4 +1,3 @@
-import "leaflet/dist/leaflet.css";
 import { SmoothWheelZoom } from "./SmoothWheelZoom";
 import { AddCustomMarkers } from "./AddCustomMarkers";
 
@@ -14,6 +13,7 @@ export function customizeMap(L, { maxX = 1000, maxY = 1000 } = {}) {
 				scrollWheelZoom: false,
 				smoothWheelZoom: true,
 				doubleClickZoom: false,
+				zoomSnap: false,
 			});
 
 			const bounds = new L.LatLngBounds([

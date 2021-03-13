@@ -13,22 +13,30 @@ export function SmoothWheelZoom(L) {
 
 	L.Map.SmoothZoomControl = L.Control.Zoom.extend({
 		_zoomIn: function (e) {
-			if (!this._disabled && this._map._zoom < this._map.getMaxZoom()) {
-				this._map.flyTo(
-					this._map.getCenter(),
-					this._map.getZoom() +
-						this._map.options.zoomDelta * (e.shiftKey ? 3 : 1)
-				);
+			let newZoom =
+				this._map._zoom +
+				this._map.options.zoomDelta * (e.shiftKey ? 3 : 1);
+
+			if (newZoom > this._map.getMaxZoom()) {
+				newZoom = this._map.getMaxZoom();
+			}
+
+			if (!this._disabled) {
+				this._map.flyTo(this._map.getCenter(), newZoom);
 			}
 		},
 
 		_zoomOut: function (e) {
-			if (!this._disabled && this._map._zoom > this._map.getMinZoom()) {
-				this._map.flyTo(
-					this._map.getCenter(),
-					this._map.getZoom() -
-						this._map.options.zoomDelta * (e.shiftKey ? 3 : 1)
-				);
+			let newZoom =
+				this._map._zoom -
+				this._map.options.zoomDelta * (e.shiftKey ? 3 : 1);
+
+			if (newZoom < this._map.getMinZoom()) {
+				newZoom = this._map.getMinZoom();
+			}
+
+			if (!this._disabled) {
+				this._map.flyTo(this._map.getCenter(), newZoom);
 			}
 		},
 	});
@@ -64,12 +72,16 @@ export function SmoothWheelZoom(L) {
 		},
 
 		_onDblClick: function (e) {
-			if (!this._disabled && this._map._zoom < this._map.getMaxZoom()) {
-				this._map.flyTo(
-					e.latlng,
-					this._map.getZoom() +
-						this._map.options.zoomDelta * (e.shiftKey ? 3 : 1)
-				);
+			let newZoom =
+				this._map._zoom +
+				this._map.options.zoomDelta * (e.shiftKey ? 3 : 1);
+
+			if (newZoom > this._map.getMaxZoom()) {
+				newZoom = this._map.getMaxZoom();
+			}
+
+			if (!this._disabled) {
+				this._map.flyTo(e.latlng, newZoom);
 			}
 		},
 

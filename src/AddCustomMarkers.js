@@ -21,6 +21,10 @@ export function AddCustomMarkers(L, maxX, maxY) {
 			);
 		},
 
+		getIcon: function () {
+			return this._icon;
+		},
+
 		// Breaks the line up into tiny chunks (see options) ONLY if CSS3 animations
 		// are not supported.
 		_chunk: function (latlngs) {
@@ -194,6 +198,12 @@ export function AddCustomMarkers(L, maxX, maxY) {
 			};
 		},
 
+		setZ: function (newZ) {
+			this.z = newZ;
+			this.setForceZIndex(newZ);
+			this.redraw();
+		},
+
 		setSize: function (newSize) {
 			this.size = newSize;
 			if (this._map) {
@@ -215,6 +225,13 @@ export function AddCustomMarkers(L, maxX, maxY) {
 
 		setClassName: function (newClassName) {
 			this.className = newClassName;
+			if (this._map) {
+				this._updateWeight(this._map);
+			}
+		},
+
+		setInnerHTML: function (innerHTML) {
+			this.innerHTML = innerHTML;
 			if (this._map) {
 				this._updateWeight(this._map);
 			}
@@ -249,8 +266,9 @@ export function AddCustomMarkers(L, maxX, maxY) {
 		initialize: function (options) {
 			const {
 				map,
-				x = 0,
-				y = 0,
+				x = null,
+				y = null,
+				latlng = null,
 				z = 0,
 				innerHTML = `
 					<div 
@@ -269,7 +287,12 @@ export function AddCustomMarkers(L, maxX, maxY) {
 
 			const self = this;
 
-			const latlngs = [[-y + maxX / 2, x + maxY / 2]];
+			let latlngs = [[0, 0]];
+			if (x !== null && y !== null) {
+				latlngs = [[-y + maxX / 2, x + maxY / 2]];
+			} else {
+				latlngs = [latlng];
+			}
 
 			this.customOptions = {
 				...options,
@@ -279,6 +302,7 @@ export function AddCustomMarkers(L, maxX, maxY) {
 			};
 
 			this.innerHTML = innerHTML;
+			this.z = z;
 
 			FixedMarker.prototype.initialize.call(this, this.customOptions);
 
