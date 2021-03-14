@@ -13,9 +13,16 @@ module.exports = ({ development }) => {
 			: undefined,
 		entry: {
 			bundle: path.join(__dirname, "src", "index.js"),
-			example: path.join(__dirname, "src", "example.js"),
+			"table-example": path.join(__dirname, "src", "table-example.js"),
+			"basic-example": path.join(__dirname, "src", "basic-example.js"),
+			"stress-test-example": path.join(
+				__dirname,
+				"src",
+				"stress-test-example.js"
+			),
 		},
 		output: {
+			publicPath: "/js/",
 			path: path.join(__dirname, "dist", "js"),
 			filename: "[name].js",
 		},
