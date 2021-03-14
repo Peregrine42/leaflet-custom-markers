@@ -1,33 +1,38 @@
-const path = require("path")
+const path = require("path");
 
-module.exports = ({
-	development
-}) => {
+module.exports = ({ development }) => {
 	return {
 		mode: development ? "development" : "production",
 		devtool: development ? "source-map" : undefined,
-		watch: development,
+		devServer: development
+			? {
+					contentBase: path.join(__dirname, "dist"),
+					compress: true,
+					port: 8888,
+			  }
+			: undefined,
 		entry: {
-			"bundle": path.join(__dirname, "src", "index.js"),
-			"example": path.join(__dirname, "src", "example.js"),
+			bundle: path.join(__dirname, "src", "index.js"),
+			example: path.join(__dirname, "src", "example.js"),
 		},
 		output: {
 			path: path.join(__dirname, "dist", "js"),
-			filename: "[name].js"
+			filename: "[name].js",
 		},
 		resolve: {
-			extensions: [".js"]
+			extensions: [".js"],
 		},
 		module: {
-			rules: [{
+			rules: [
+				{
 					test: /\.m?js$/,
 					exclude: /node_modules/,
 					use: {
 						loader: "babel-loader",
 						options: {
-							presets: ['@babel/preset-env']
-						}
-					}
+							presets: ["@babel/preset-env"],
+						},
+					},
 				},
 				{
 					test: /\.css$/i,
@@ -39,8 +44,8 @@ module.exports = ({
 					options: {
 						limit: 8192,
 					},
-				}
-			]
-		}
-	}
+				},
+			],
+		},
+	};
 };
