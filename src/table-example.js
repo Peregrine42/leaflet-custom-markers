@@ -104,8 +104,7 @@ function main() {
 	});
 	map.setMaxBounds(map.getBounds().pad(0.5));
 	const background = new L.CustomMarker({
-		x: 0,
-		y: 0,
+		latlng: [0 + 500, 0 + 500],
 		innerHTML: `
 			<div 
 				style="
@@ -156,10 +155,9 @@ function main() {
 
 	const testMarkers = testCards.map((c) => {
 		return new L.CustomMarker({
-			x: c.x,
-			y: c.y,
-			z: c.z,
 			id: c.id,
+			latlng: [500 - c.y, 500 + c.x],
+			z: c.z,
 			stackedBy: null,
 			kind: c.kind,
 			innerHTML: cardInnerHTML(c),
@@ -169,8 +167,7 @@ function main() {
 	const testStackMarkers = testStacks.map((s) => {
 		const m = new L.CustomMarker({
 			id: s.id,
-			x: s.x,
-			y: s.y,
+			latlng: [500 - s.y, 500 + s.x],
 			z: s.z,
 			staggered: s.staggered,
 			stacked: [],
@@ -387,13 +384,15 @@ function main() {
 }
 
 function refreshStack(s) {
+	console.log(s);
 	if (s.customOptions.staggered) {
 		let base = s.getLatLng().clone();
 		s.customOptions.stacked.forEach((m) => {
 			m.setLine([m.getLatLng(), base]).start();
 			base = base.clone();
-			base.lat -= 10;
-			base.lng += 10;
+			console.log(base);
+			base.lat -= 20;
+			base.lng += 20;
 		});
 	} else {
 		const base = s.getLatLng().clone();

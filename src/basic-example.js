@@ -4,17 +4,27 @@ import { customizeMap } from "./index";
 
 window.addEventListener("load", function () {
 	const container = document.getElementById("container");
+
 	customizeMap(L);
+
 	const map = new L.CustomMap(container, {
 		maxZoom: 3,
 		fullscreenControl: true,
 		doubleClickZoom: false,
 		minZoom: -0.5,
+		crs: L.CRS.Simple,
 	});
+
 	map.setMaxBounds(map.getBounds().pad(0.5));
+
+	// `innerHTML` determines how the icon will look.
+	// The only requirement is to include `position: absolute`,
+	// so that the icon's width is used, and not the
+	// containing div (which is one pixel in size).
+	// This marker will scale with the map,
+	// appearing the same relative size.
 	new L.CustomMarker({
-		x: -50,
-		y: 0,
+		latlng: [500 - 0, 500 - 50],
 		innerHTML: `
 			<div 
 				style="
@@ -30,9 +40,13 @@ window.addEventListener("load", function () {
 		`,
 	}).addTo(map);
 
+	// To animate a marker, specify `latlngs` as an array,
+	// instead of using `latlng`.
 	new L.CustomMarker({
-		x: 50,
-		y: 0,
+		latlngs: [
+			[500 - 0, 500 + 50],
+			[500 - 0, 500 + 100],
+		],
 		innerHTML: `
 			<div 
 				style="
@@ -46,5 +60,7 @@ window.addEventListener("load", function () {
 				"
 			></div>
 		`,
-	}).addTo(map);
+	})
+		.addTo(map)
+		.start();
 });

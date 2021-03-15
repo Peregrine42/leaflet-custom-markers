@@ -3,17 +3,16 @@ import { AddCustomMarkers } from "./AddCustomMarkers";
 
 export function customizeMap(L, { maxX = 1000, maxY = 1000 } = {}) {
 	SmoothWheelZoom(L);
-	AddCustomMarkers(L, maxX, maxY);
+	AddCustomMarkers(L);
 
 	const CustomMap = L.Map.extend({
 		initialize: function (container, options) {
 			L.Map.prototype.initialize.call(this, container, {
-				...options,
-				crs: L.CRS.Simple,
 				scrollWheelZoom: false,
 				smoothWheelZoom: true,
 				doubleClickZoom: false,
 				zoomSnap: false,
+				...options,
 			});
 
 			const bounds = new L.LatLngBounds([

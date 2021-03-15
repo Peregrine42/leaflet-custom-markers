@@ -1,4 +1,4 @@
-export function AddCustomMarkers(L, maxX, maxY) {
+export function AddCustomMarkers(L) {
 	const AnimatedMarker = L.Marker.extend({
 		options: {
 			// meters
@@ -224,12 +224,22 @@ export function AddCustomMarkers(L, maxX, maxY) {
 		_updateWeight: function (map) {
 			const sizeOnScreen = this._getWeight(map);
 
+			// const y = this._map.getSize().y;
+			// const x = this._map.getSize().x;
+			// const maxMeters = this._map
+			// 	.containerPointToLatLng([0, y])
+			// 	.distanceTo(this._map.containerPointToLatLng([x, y]));
+			// const metersPerPixel = maxMeters / x;
+
+			// console.log(1 /metersPerPixel);
+
 			const divString = this.render({
 				size: sizeOnScreen,
+				// metersPerPixel,
 			});
 
 			const icon = new L.DivIcon({
-				iconSize: [sizeOnScreen, sizeOnScreen],
+				iconSize: [1, 1],
 				className: "zero",
 				html: divString,
 			});
@@ -249,11 +259,10 @@ export function AddCustomMarkers(L, maxX, maxY) {
 	const CustomMarker = FixedMarker.extend({
 		initialize: function (options) {
 			const {
-				map,
-				x = null,
-				y = null,
 				latlng = null,
+				latlngs = null,
 				z = 0,
+				scaleFactor = 1,
 				innerHTML = `
 					<div 
 						class="marker" 
@@ -271,36 +280,39 @@ export function AddCustomMarkers(L, maxX, maxY) {
 
 			const self = this;
 
-			let latlngs = [[0, 0]];
-			if (x !== null && y !== null) {
-				latlngs = [[-y + maxX / 2, x + maxY / 2]];
+			let position = [[0, 0]];
+			if (latlngs) {
+				position = latlngs;
 			} else {
-				latlngs = [latlng];
+				position = [latlng];
 			}
 
 			this.customOptions = {
 				...options,
 				forceZIndex: z,
-				latlngs,
+				latlngs: position,
 				size: 1,
 			};
 
 			this.innerHTML = innerHTML;
 			this.z = z;
+			this.scaleFactor = scaleFactor;
 
 			FixedMarker.prototype.initialize.call(this, this.customOptions);
 
 			this.render = (opts) => {
 				const inner = this.innerHTML;
+
 				return `
 					<div 
 						style="
-							display: flex; 
-							justify-content: center; 
-							align-items: center; 
-							width: 1px; 
-							height: 1px; 
-							transform: translate(-50%, -50%) scale(${opts.size});
+							position: absolute;
+							display: flex;
+							justify-content: center;
+							align-items: center;
+							width: 0px; 
+							height: 0px; 
+							transform: scale(${opts.size / this.scaleFactor});
 						";
 					>
 						${inner}
