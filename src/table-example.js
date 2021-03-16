@@ -101,8 +101,10 @@ function main() {
 		fullscreenControl: true,
 		doubleClickZoom: false,
 		minZoom: -0.5,
+		crs: L.CRS.Simple,
 	});
 	map.setMaxBounds(map.getBounds().pad(0.5));
+
 	const background = new L.CustomMarker({
 		latlng: [0 + 500, 0 + 500],
 		innerHTML: `

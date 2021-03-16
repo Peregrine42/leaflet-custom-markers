@@ -224,18 +224,8 @@ export function AddCustomMarkers(L) {
 		_updateWeight: function (map) {
 			const sizeOnScreen = this._getWeight(map);
 
-			// const y = this._map.getSize().y;
-			// const x = this._map.getSize().x;
-			// const maxMeters = this._map
-			// 	.containerPointToLatLng([0, y])
-			// 	.distanceTo(this._map.containerPointToLatLng([x, y]));
-			// const metersPerPixel = maxMeters / x;
-
-			// console.log(1 /metersPerPixel);
-
 			const divString = this.render({
 				size: sizeOnScreen,
-				// metersPerPixel,
 			});
 
 			const icon = new L.DivIcon({
