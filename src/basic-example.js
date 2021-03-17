@@ -13,9 +13,9 @@ window.addEventListener("load", function () {
 		doubleClickZoom: false,
 		minZoom: -0.5,
 		crs: L.CRS.Simple,
+		zoom: 0,
+		center: [500, 500],
 	});
-
-	map.setMaxBounds(map.getBounds().pad(0.5));
 
 	// `innerHTML` determines how the icon will look.
 	// The only requirement is to include `position: absolute`,
@@ -45,7 +45,7 @@ window.addEventListener("load", function () {
 	new L.CustomMarker({
 		latlngs: [
 			[500 - 0, 500 + 50],
-			[500 - 0, 500 + 100],
+			[500 - 50, 500 + 100],
 		],
 		innerHTML: `
 			<div 

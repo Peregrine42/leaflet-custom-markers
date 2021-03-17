@@ -100,10 +100,10 @@ function main() {
 		maxZoom: 3,
 		fullscreenControl: true,
 		doubleClickZoom: false,
-		minZoom: -0.5,
+		center: [500, 500],
+		zoom: 0.3,
 		crs: L.CRS.Simple,
 	});
-	map.setMaxBounds(map.getBounds().pad(0.5));
 
 	const background = new L.CustomMarker({
 		latlng: [0 + 500, 0 + 500],
@@ -155,6 +155,7 @@ function main() {
 		`;
 	};
 
+	// const testMarkers = [];
 	const testMarkers = testCards.map((c) => {
 		return new L.CustomMarker({
 			id: c.id,
@@ -197,13 +198,15 @@ function main() {
 							border-radius: 50px;
 							border-style: solid;
 							border-color: white;
-							border-width: 3px;	
+							border-width: 3px;
 						"
 					>
 					</div>
 				</div>
 			`,
 		}).addTo(map);
+
+		// const m = L.marker([500 - s.y, 500 + s.x]).addTo(map);
 
 		m.getIcon().style.pointerEvents = "none";
 		return m;

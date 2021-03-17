@@ -13,12 +13,15 @@ export function AddCustomMarkers(L) {
 		},
 
 		initialize: function (options) {
-			this.setLine(options.latlngs);
-			L.Marker.prototype.initialize.call(
-				this,
-				options.latlngs[0],
-				options
-			);
+			let initialLatLng;
+			if (options.latlng) {
+				initialLatLng = options.latlng;
+			} else {
+				initialLatLng = options.latlngs[0];
+				this.setLine(options.latlngs);
+			}
+
+			L.Marker.prototype.initialize.call(this, initialLatLng, options);
 		},
 
 		getIcon: function () {
@@ -99,12 +102,12 @@ export function AddCustomMarkers(L) {
 			this._tid = setTimeout(
 				function () {
 					if (self._i >= len) {
-						if (L.DomUtil.TRANSITION) {
-							if (this._icon) {
-								this._icon.style[L.DomUtil.TRANSITION] = "";
-							}
-						}
 						this.animating = false;
+
+						// if (this._icon) {
+						// 	this._icon.style[L.DomUtil.TRANSITION] = "";
+						// }
+
 						self.options.onEnd.apply(
 							self,
 							Array.prototype.slice.call(this)
@@ -235,6 +238,13 @@ export function AddCustomMarkers(L) {
 			});
 
 			this.setIcon(icon);
+
+			if (L.DomUtil.TRANSITION) {
+				if (this._icon) {
+					// 		this._icon.style[L.DomUtil.TRANSITION] = "";
+					this._icon.classList.remove("leaflet-zoom-animated");
+				}
+			}
 		},
 
 		_getWeight: function (map) {
@@ -249,8 +259,8 @@ export function AddCustomMarkers(L) {
 	const CustomMarker = FixedMarker.extend({
 		initialize: function (options) {
 			const {
-				latlng = null,
-				latlngs = null,
+				latlng,
+				latlngs,
 				z = 0,
 				scaleFactor = 1,
 				innerHTML = `
@@ -270,17 +280,11 @@ export function AddCustomMarkers(L) {
 
 			const self = this;
 
-			let position = [[0, 0]];
-			if (latlngs) {
-				position = latlngs;
-			} else {
-				position = [latlng];
-			}
-
 			this.customOptions = {
 				...options,
 				forceZIndex: z,
-				latlngs: position,
+				latlng,
+				latlngs,
 				size: 1,
 			};
 

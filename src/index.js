@@ -14,13 +14,6 @@ export function customizeMap(L, { maxX = 1000, maxY = 1000 } = {}) {
 				zoomSnap: false,
 				...options,
 			});
-
-			const bounds = new L.LatLngBounds([
-				[0, 0],
-				[maxX, maxY],
-			]);
-
-			this.fitBounds(bounds);
 		},
 	});
 
