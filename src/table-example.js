@@ -389,13 +389,11 @@ function main() {
 }
 
 function refreshStack(s) {
-	console.log(s);
 	if (s.customOptions.staggered) {
 		let base = s.getLatLng().clone();
 		s.customOptions.stacked.forEach((m) => {
 			m.setLine([m.getLatLng(), base]).start();
 			base = base.clone();
-			console.log(base);
 			base.lat -= 20;
 			base.lng += 20;
 		});

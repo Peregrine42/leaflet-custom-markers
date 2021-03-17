@@ -1,5 +1,9 @@
+const isDefined = (val) => {
+	return typeof val !== "undefined" && val !== null;
+};
+
 export function AddCustomMarkers(L) {
-	const AnimatedMarker = L.Marker.extend({
+	const CustomMarker = L.Marker.extend({
 		options: {
 			// meters
 			distance: 200,
@@ -13,62 +17,87 @@ export function AddCustomMarkers(L) {
 		},
 
 		initialize: function (options) {
+			const {
+				latlng,
+				latlngs,
+				z = 0,
+				scaleFactor = 1,
+				innerHTML = `
+					<div 
+						class="marker" 
+						style="
+							position: absolute; 
+							width: 50px; 
+							height: 50px;
+							border-radius: 10px;
+							background-color: orange;
+						"
+					>
+					</div>
+				`,
+			} = options;
+
+			const self = this;
+
+			this.customOptions = {
+				...options,
+				forceZIndex: z,
+				latlng,
+				latlngs,
+				size: 1,
+			};
+
+			this.innerHTML = innerHTML;
+			this.z = z;
+			this.scaleFactor = scaleFactor;
+
+			this.size = this.customOptions.size;
+
 			let initialLatLng;
-			if (options.latlng) {
-				initialLatLng = options.latlng;
+			if (this.customOptions.latlng) {
+				initialLatLng = this.customOptions.latlng;
 			} else {
-				initialLatLng = options.latlngs[0];
-				this.setLine(options.latlngs);
+				initialLatLng = this.customOptions.latlngs[0];
+				this.setLine(this.customOptions.latlngs);
 			}
 
-			L.Marker.prototype.initialize.call(this, initialLatLng, options);
-		},
+			L.Marker.prototype.initialize.call(
+				this,
+				initialLatLng,
+				this.customOptions
+			);
 
-		getIcon: function () {
-			return this._icon;
-		},
-
-		// Breaks the line up into tiny chunks (see options) ONLY if CSS3 animations
-		// are not supported.
-		_chunk: function (latlngs) {
-			let i,
-				len = latlngs.length,
-				chunkedLatLngs = [];
-
-			for (i = 1; i < len; i++) {
-				let cur = latlngs[i - 1],
-					next = latlngs[i],
-					dist = cur.distanceTo(next),
-					factor = this.options.distance / dist,
-					dLat = factor * (next.lat - cur.lat),
-					dLng = factor * (next.lng - cur.lng);
-
-				if (dist > this.options.distance) {
-					while (dist > this.options.distance) {
-						cur = new L.LatLng(cur.lat + dLat, cur.lng + dLng);
-						dist = cur.distanceTo(next);
-						chunkedLatLngs.push(cur);
-					}
-				} else {
-					chunkedLatLngs.push(cur);
-				}
+			if (!isDefined(this.customOptions.size)) {
+				throw "No size set";
 			}
-			chunkedLatLngs.push(latlngs[len - 1]);
 
-			return chunkedLatLngs;
-		},
+			this.updateCallback = function (_e) {
+				self._updateWeight(this);
+			};
 
-		onAdd: function (map) {
-			L.Marker.prototype.onAdd.call(this, map);
+			this.render = (opts) => {
+				const inner = this.innerHTML;
 
-			// Start animating when added to the map
-			if (this.options.autoStart) {
-				this.start();
-			}
-		},
+				return `
+					<div 
+						style="
+							position: absolute;
+							display: flex;
+							justify-content: center;
+							align-items: center;
+							width: 0px; 
+							height: 0px; 
+							transform: scale(${opts.size / this.scaleFactor});
+						";
+					>
+						${inner}
+					</div> 
+				`;
+			};
 
-		onRemove: function (map) {
-			L.Marker.prototype.onRemove.call(this, map);
+			this.updateCallback = function (_e) {
+				self._updateWeight(this);
+			};
 		},
 
 		animate: function () {
@@ -120,6 +149,10 @@ export function AddCustomMarkers(L) {
 			);
 		},
 
+		getIcon: function () {
+			return this._icon;
+		},
+
 		// Start the animation
 		start: function () {
 			this.animating = true;
@@ -130,6 +163,49 @@ export function AddCustomMarkers(L) {
 		stop: function () {
 			if (this._tid) {
 				clearTimeout(this._tid);
+			}
+		},
+
+		// Breaks the line up into tiny chunks (see options) ONLY if CSS3 animations
+		// are not supported.
+		_chunk: function (latlngs) {
+			let i,
+				len = latlngs.length,
+				chunkedLatLngs = [];
+
+			for (i = 1; i < len; i++) {
+				let cur = latlngs[i - 1],
+					next = latlngs[i],
+					dist = cur.distanceTo(next),
+					factor = this.options.distance / dist,
+					dLat = factor * (next.lat - cur.lat),
+					dLng = factor * (next.lng - cur.lng);
+
+				if (dist > this.options.distance) {
+					while (dist > this.options.distance) {
+						cur = new L.LatLng(cur.lat + dLat, cur.lng + dLng);
+						dist = cur.distanceTo(next);
+						chunkedLatLngs.push(cur);
+					}
+				} else {
+					chunkedLatLngs.push(cur);
+				}
+			}
+			chunkedLatLngs.push(latlngs[len - 1]);
+
+			return chunkedLatLngs;
+		},
+
+		setZ: function (newZ) {
+			this.z = newZ;
+			this.setForceZIndex(newZ);
+			this.redraw();
+		},
+
+		setSize: function (newSize) {
+			this.size = newSize;
+			if (this._map) {
+				this._updateWeight(this._map);
 			}
 		},
 
@@ -146,60 +222,29 @@ export function AddCustomMarkers(L) {
 			this._i = 0;
 			return this;
 		},
-	});
-
-	const isDefined = (val) => {
-		return typeof val !== "undefined" && val !== null;
-	};
-
-	(function (global) {
-		var MarkerMixin = {
-			_updateZIndex: function (offset) {
-				this._icon.style.zIndex = isDefined(this.options.forceZIndex)
-					? this.options.forceZIndex +
-					  (this.options.zIndexOffset || 0)
-					: this._zIndex + offset;
-			},
-			setForceZIndex: function (forceZIndex) {
-				this.options.forceZIndex = isDefined(forceZIndex)
-					? forceZIndex
-					: null;
-			},
-		};
-		if (global) global.include(MarkerMixin);
-	})(AnimatedMarker);
-
-	const FixedMarker = AnimatedMarker.extend({
-		initialize: function (options) {
-			this.size = options.size;
-
-			const self = this;
-
-			AnimatedMarker.prototype.initialize.call(this, options);
-			if (!isDefined(this.size)) {
-				throw "No size set";
-			}
-
-			this.updateCallback = function (_e) {
-				self._updateWeight(this);
-			};
-		},
-
-		setZ: function (newZ) {
-			this.z = newZ;
-			this.setForceZIndex(newZ);
-			this.redraw();
-		},
-
-		setSize: function (newSize) {
-			this.size = newSize;
-			if (this._map) {
-				this._updateWeight(this._map);
-			}
-		},
 
 		onAdd: function (map) {
-			AnimatedMarker.prototype.onAdd.call(this, map);
+			L.Marker.prototype.onAdd.call(this, map);
+
+			// Start animating when added to the map
+			if (this.options.autoStart) {
+				this.start();
+			}
+
+			map.on("zoomstart", () => {
+				const i = this.getIcon();
+				if (i) {
+					i.style[L.DomUtil.TRANSITION] = "";
+					i.style.transition = "";
+				}
+			});
+			map.on("movestart", () => {
+				const i = this.getIcon();
+				if (i) {
+					i.style[L.DomUtil.TRANSITION] = "";
+					i.style.transition = "";
+				}
+			});
 			map.on("zoom", this.updateCallback);
 			this._map = map;
 			this._updateWeight(map);
@@ -207,7 +252,7 @@ export function AddCustomMarkers(L) {
 
 		onRemove: function (map) {
 			map.off("zoom", this.updateCallback);
-			AnimatedMarker.prototype.onRemove.call(this, map);
+			L.Marker.prototype.onRemove.call(this, map);
 		},
 
 		setClassName: function (newClassName) {
@@ -238,13 +283,6 @@ export function AddCustomMarkers(L) {
 			});
 
 			this.setIcon(icon);
-
-			if (L.DomUtil.TRANSITION) {
-				if (this._icon) {
-					// 		this._icon.style[L.DomUtil.TRANSITION] = "";
-					this._icon.classList.remove("leaflet-zoom-animated");
-				}
-			}
 		},
 
 		_getWeight: function (map) {
@@ -254,69 +292,17 @@ export function AddCustomMarkers(L) {
 		redraw: function () {
 			this._updateWeight(this._map);
 		},
-	});
 
-	const CustomMarker = FixedMarker.extend({
-		initialize: function (options) {
-			const {
-				latlng,
-				latlngs,
-				z = 0,
-				scaleFactor = 1,
-				innerHTML = `
-					<div 
-						class="marker" 
-						style="
-							position: absolute; 
-							width: 50px; 
-							height: 50px;
-							border-radius: 10px;
-							background-color: orange;
-						"
-					>
-					</div>
-				`,
-			} = options;
+		_updateZIndex: function (offset) {
+			this._icon.style.zIndex = isDefined(this.options.forceZIndex)
+				? this.options.forceZIndex + (this.options.zIndexOffset || 0)
+				: this._zIndex + offset;
+		},
 
-			const self = this;
-
-			this.customOptions = {
-				...options,
-				forceZIndex: z,
-				latlng,
-				latlngs,
-				size: 1,
-			};
-
-			this.innerHTML = innerHTML;
-			this.z = z;
-			this.scaleFactor = scaleFactor;
-
-			FixedMarker.prototype.initialize.call(this, this.customOptions);
-
-			this.render = (opts) => {
-				const inner = this.innerHTML;
-
-				return `
-					<div 
-						style="
-							position: absolute;
-							display: flex;
-							justify-content: center;
-							align-items: center;
-							width: 0px; 
-							height: 0px; 
-							transform: scale(${opts.size / this.scaleFactor});
-						";
-					>
-						${inner}
-					</div> 
-				`;
-			};
-
-			this.updateCallback = function (_e) {
-				self._updateWeight(this);
-			};
+		setForceZIndex: function (forceZIndex) {
+			this.options.forceZIndex = isDefined(forceZIndex)
+				? forceZIndex
+				: null;
 		},
 	});
 
