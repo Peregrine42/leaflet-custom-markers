@@ -30,7 +30,7 @@ window.addEventListener("load", function () {
 				style="
 					position: absolute;
 					width: 50px;
-					height: 50px;
+					height: 20px;
 					background-color: green;
 					border-radius: 25px;
 					border-style: solid;

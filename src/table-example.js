@@ -101,7 +101,8 @@ function main() {
 		fullscreenControl: true,
 		doubleClickZoom: false,
 		center: [500, 500],
-		zoom: 0.3,
+		minZoom: -0.5,
+		zoom: -0.5,
 		crs: L.CRS.Simple,
 	});
 

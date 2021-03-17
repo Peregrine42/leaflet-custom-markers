@@ -27,6 +27,7 @@ window.addEventListener("load", function () {
 					width: 50px;
 					height: 50px;
 					background-color: green;
+					border-style: solid;
 					border-color: darkgreen;
 				"
 			></div>
@@ -38,16 +39,17 @@ window.addEventListener("load", function () {
 	new L.CustomMarker({
 		latlngs: [
 			[51.5, -0.09],
-			[51.5, -0.19],
+			[51.5, -0.1],
 		],
+		scaleFactor: 10000,
 		innerHTML: `
 			<div
 				style="
 					position: absolute;
-					width: 5px;
-					height: 5px;
+					width: 50px;
+					height: 50px;
 					background-color: green;
-					border-radius: 25px;
+					border-radius: 50px;
 					border-style: solid;
 					border-color: darkgreen;
 				"

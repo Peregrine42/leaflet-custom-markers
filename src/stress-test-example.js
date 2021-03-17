@@ -10,8 +10,10 @@ window.addEventListener("load", function () {
 		fullscreenControl: true,
 		doubleClickZoom: false,
 		minZoom: -0.5,
+		zoom: -0.5,
+		center: [500, 500],
+		crs: L.CRS.Simple,
 	});
-	map.setMaxBounds(map.getBounds().pad(0.5));
 
 	const amount = 16;
 	const size = 50;
@@ -19,8 +21,10 @@ window.addEventListener("load", function () {
 	for (let j = 0; j < amount; j += 1) {
 		for (let i = 0; i < amount; i += 1) {
 			new L.CustomMarker({
-				x: -((amount / 2) * (size + margin)) + i * (size + margin),
-				y: -((amount / 2) * (size + margin)) + j * (size + margin),
+				latlng: [
+					500 - (amount / 2) * (size + margin) + i * (size + margin),
+					500 - (amount / 2) * (size + margin) + j * (size + margin),
+				],
 				innerHTML: `
 					<div 
 						style="
