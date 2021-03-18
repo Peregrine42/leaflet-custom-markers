@@ -1,3 +1,4 @@
+const CopyPlugin = require("copy-webpack-plugin");
 const path = require("path");
 
 module.exports = ({ development }) => {
@@ -9,22 +10,19 @@ module.exports = ({ development }) => {
 					contentBase: [path.join(__dirname, "dist")],
 					compress: true,
 					port: 8888,
+					writeToDisk: true,
 			  }
 			: undefined,
-		entry: {
-			bundle: path.join(__dirname, "src", "index.js"),
-			"table-example": path.join(__dirname, "src", "table-example.js"),
-			"basic-example": path.join(__dirname, "src", "basic-example.js"),
-			"map-example": path.join(__dirname, "src", "map-example.js"),
-			"stress-test-example": path.join(
-				__dirname,
-				"src",
-				"stress-test-example.js"
-			),
-		},
+		entry: path.join(__dirname, "src", "index.js"),
 		output: {
 			path: path.join(__dirname, "dist"),
 			filename: "[name].js",
+			library: {
+				name: "leafletCustomMarkers",
+				type: "umd",
+			},
+			globalObject: `(typeof self !== 'undefined' ? self : this)`,
+			umdNamedDefine: true,
 		},
 		resolve: {
 			extensions: [".js"],
@@ -56,5 +54,20 @@ module.exports = ({ development }) => {
 				},
 			],
 		},
+		plugins: [
+			new CopyPlugin({
+				patterns: [
+					{
+						from: path.join(
+							__dirname,
+							"node_modules",
+							"leaflet",
+							"dist"
+						),
+						to: path.join(__dirname, "dist", "leaflet"),
+					},
+				],
+			}),
+		],
 	};
 };

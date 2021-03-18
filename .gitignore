@@ -1,4 +1,6 @@
 node_modules
 dist/*.js
 dist/img/
+dist/*.txt
+dist/leaflet
 *.map

@@ -1,6 +1,6 @@
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { customizeMap } from "./index";
+import { customizeMap } from "../src/index";
 
 window.addEventListener("load", function () {
 	const container = document.getElementById("container");

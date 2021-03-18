@@ -2,7 +2,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-fullscreen/dist/leaflet.fullscreen.css";
 import L from "leaflet";
 import "leaflet-fullscreen/dist/Leaflet.fullscreen";
-import { customizeMap } from "./index";
+import { customizeMap } from "../src/index";
 
 class Card {
 	constructor({ id, x = 0, y = 0, z = 0, color = null, image = null } = {}) {

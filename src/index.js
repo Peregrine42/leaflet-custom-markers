@@ -1,7 +1,7 @@
 import { SmoothWheelZoom } from "./SmoothWheelZoom";
 import { AddCustomMarkers } from "./AddCustomMarkers";
 
-export function customizeMap(L, { maxX = 1000, maxY = 1000 } = {}) {
+export function customizeMap(L) {
 	SmoothWheelZoom(L);
 	AddCustomMarkers(L);
 
