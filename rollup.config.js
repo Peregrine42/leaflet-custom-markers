@@ -1,44 +1,47 @@
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import babel from "@rollup/plugin-babel";
+import copy from "rollup-plugin-copy";
 
-export default [
-	// browser-friendly UMD build
-	{
-		input: "src/index.js",
+const browser = [
+	"src/index.js",
+	"example/stress-test-example.js",
+	"example/map-example.js",
+	"example/table-example.js",
+].map((inp, i) => {
+	return {
+		input: inp,
 		output: {
 			name: "leafletCustomMarkers",
-			file: "dist/main.js",
+			dir: "dist/",
 			format: "umd",
 		},
 		plugins: [
-			resolve(), // so Rollup can find `ms`
-			commonjs(), // so Rollup can convert `ms` to an ES module
+			resolve(),
+			commonjs(),
 			babel({
 				exclude: ["node_modules/**"],
 				babelHelpers: "bundled",
 			}),
+			i === 0
+				? copy({
+						targets: [
+							{
+								src: "node_modules/leaflet/dist/**/*",
+								dest: "dist/leaflet",
+							},
+						],
+						targets: [
+							{
+								src:
+									"node_modules/leaflet-fullscreen/dist/**/*",
+								dest: "dist/leaflet-fullscreen",
+							},
+						],
+				  })
+				: null,
 		],
-	},
+	};
+});
 
-	// CommonJS (for Node) and ES module (for bundlers) build.
-	// (We could have three entries in the configuration array
-	// instead of two, but it's quicker to generate multiple
-	// builds from a single configuration where possible, using
-	// an array for the `output` option, where we can specify
-	// `file` and `format` for each target)
-	{
-		input: "src/index.js",
-		external: ["ms"],
-		output: [
-			{ file: "dist/main.cjs.js", format: "cjs" },
-			{ file: "dist/main.esm.js", format: "es" },
-		],
-		plugins: [
-			babel({
-				exclude: ["node_modules/**"],
-				babelHelpers: "bundled",
-			}),
-		],
-	},
-];
+export default [...browser];
