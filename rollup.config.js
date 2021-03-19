@@ -30,8 +30,6 @@ const browser = [
 								src: "node_modules/leaflet/dist/**/*",
 								dest: "dist/leaflet",
 							},
-						],
-						targets: [
 							{
 								src:
 									"node_modules/leaflet-fullscreen/dist/**/*",
